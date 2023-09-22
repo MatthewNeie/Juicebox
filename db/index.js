@@ -17,8 +17,8 @@ async function createUser({
 }) {
   try {
     const { rows: [ user ] } = await client.query(`
-      INSERT INTO users(username, password, name) 
-      VALUES($1, $2, $3) 
+      INSERT INTO users(username, password, name, location)
+      VALUES($1, $2, $3, $4) 
       ON CONFLICT (username) DO NOTHING 
       RETURNING *;
     `, [username, password, name, location]);
@@ -57,7 +57,7 @@ async function updateUser(id, fields = {}) {
 async function getAllUsers() {
   try {
     const { rows } = await client.query(`
-      SELECT id, username, name, location, active 
+      SELECT * 
       FROM users;
     `);
   
@@ -70,7 +70,7 @@ async function getAllUsers() {
 async function getUserById(userId) {
   try {
     const { rows: [ user ] } = await client.query(`
-      SELECT id, username, name, location, active
+      SELECT *
       FROM users
       WHERE id=${ userId }
     `);
@@ -275,7 +275,19 @@ async function getPostsByTagName(tagName) {
   } catch (error) {
     throw error;
   }
-} 
+}
+
+async function deletePostById(postId) {
+  try {
+    const { rows: post } = await client.query(`
+      DELETE *
+      FROM posts
+      WHERE "postId"=$1;`, [postId]);
+    return post;
+  } catch (error) {
+    throw error;
+  }
+}
 
 /**
  * TAG Methods
@@ -362,6 +374,7 @@ module.exports = {
   getUserById,
   getUserByUsername,
   getPostById,
+  deletePostById,
   createPost,
   updatePost,
   getAllPosts,
